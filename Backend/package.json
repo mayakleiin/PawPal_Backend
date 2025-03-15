@@ -1,0 +1,12 @@
+{
+  "name": "pawpal_backend",
+  "version": "1.0.0",
+  "description": "PawPal is a platform designed for dog owners to connect, share experiences, find dog training tips, playdates, and product recommendations.   ",
+  "license": "ISC",
+  "author": "Maya Klein & Linoy Eli",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
