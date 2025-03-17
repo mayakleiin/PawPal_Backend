@@ -2,6 +2,9 @@ import express, { Express } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
+import cors from "cors"; // Enable CORS for cross-origin requests
+
+import postRoutes from "./routes/post_route"; // Import post routes
 
 dotenv.config();
 const app = express();
@@ -22,14 +25,18 @@ const initApp = (): Promise<Express> => {
         .then(() => {
           app.use(bodyParser.json());
           app.use(bodyParser.urlencoded({ extended: true }));
+          app.use(cors()); //Enables CORS for all routes
 
+          //Register API routes
+          app.use("/posts", postRoutes); // Connect the post routes
+
+          //Default API route
           app.get("/", (_req, res) => {
             res.send("PawPal API is running");
           });
 
           resolve(app);
         })
-
         .catch((err: unknown) => {
           reject(err);
         });
