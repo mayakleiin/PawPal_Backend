@@ -2,6 +2,7 @@ import express, { Express } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
+import path from "path";
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,11 @@ const initApp = (): Promise<Express> => {
         .then(() => {
           app.use(bodyParser.json());
           app.use(bodyParser.urlencoded({ extended: true }));
+
+          app.use(
+            "/uploads",
+            express.static(path.join(__dirname, "../uploads"))
+          );
 
           app.get("/", (_req, res) => {
             res.send("PawPal API is running");
