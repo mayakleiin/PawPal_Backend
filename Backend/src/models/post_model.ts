@@ -1,44 +1,56 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-// Define TypeScript interface for a Post (extends Mongoose Document)
+/**
+ * Interface that defines the structure of a Post document.
+ * This ensures type safety when interacting with posts.
+ */
 export interface IPost extends Document {
-  title: string;
-  description?: string; // Optional description field
-  image?: string; // Optional image URL
-  owner: string; // User ID who created the post
-  likes: string[]; // Array of user IDs who liked the post
-  comments: string[]; // Array of comment IDs
+  title: string; 
+  content: string; 
+  owner: mongoose.Types.ObjectId; 
+  createdAt: Date; 
+  updatedAt: Date; 
+  likes: mongoose.Types.ObjectId[]; 
+  comments: mongoose.Types.ObjectId[]; 
 }
 
-// Define Mongoose schema for Post
-const postSchema: Schema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-  },
-  image: {
-    type: String,
-  },
-  owner: {
-    type: String,
-    required: true,
-  },
-  likes: [
-    {
-      type: String, // Storing user IDs as strings
+/**
+ * Post model Schema
+ */
+const postSchema = new Schema<IPost>(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true, // Removes unnecessary spaces from input
     },
-  ],
-  comments: [
-    {
-      type: String, // Storing comment IDs as strings
+    content: {
+      type: String,
+      required: true,
     },
-  ],
-});
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", 
+      required: true,
+    },
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User", 
+      },
+    ],
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment", 
+      },
+    ],
+  },
+  {
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
+  }
+);
 
-// Create Post model
-const postModel = mongoose.model<IPost>("Posts", postSchema);
-
-export default postModel;
+// Create and export the Post model
+const PostModel = mongoose.model<IPost>("Post", postSchema);
+export default PostModel;
