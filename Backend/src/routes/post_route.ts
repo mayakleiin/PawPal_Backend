@@ -1,7 +1,7 @@
-import express from "express";
+import express from "express"; 
 const router = express.Router();
 import postsController from "../controllers/post_controller";
-import { authMiddleware } from "../middleware/auth_middleware"; // ✅ Ensure the correct import path
+import { authMiddleware } from "../middleware/auth_middleware";
 
 //Protect routes that require authentication
 router.post("/", authMiddleware, postsController.create.bind(postsController)); // Create a new post (requires authentication)

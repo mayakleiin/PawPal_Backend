@@ -1,22 +1,16 @@
 import { Request, Response } from "express";
 import { Model, Document, Types } from "mongoose";
 
-/**
- * Interface that ensures each document has an 'owner' field
- */
+
 interface Ownable {
   owner: Types.ObjectId;
 }
 
-/**
- * Generic BaseController for CRUD operations
- */
+
 export class BaseController<T extends Document & Ownable> {
   constructor(private model: Model<T>) {}
 
-  /**
-   * Create a new item
-   */
+  
   async create(req: Request, res: Response) {
     try {
       const userId = req.query.userId as string;
@@ -28,9 +22,7 @@ export class BaseController<T extends Document & Ownable> {
     }
   }
 
-  /**
-   * Get all items
-   */
+  
   async getAll(req: Request, res: Response) {
     try {
       const ownerFilter = req.query.owner as string;
@@ -42,9 +34,7 @@ export class BaseController<T extends Document & Ownable> {
     }
   }
 
-  /**
-   * Get an item by ID
-   */
+  
   async getById(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -59,9 +49,7 @@ export class BaseController<T extends Document & Ownable> {
     }
   }
 
-  /**
-   * Update an item by ID
-   */
+  
   async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -89,9 +77,7 @@ export class BaseController<T extends Document & Ownable> {
     }
   }
 
-  /**
-   * Delete an item by ID
-   */
+  
   async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -116,9 +102,7 @@ export class BaseController<T extends Document & Ownable> {
   }
 }
 
-/**
- * Factory function to create a new controller instance
- */
+
 const createController = <T extends Document & Ownable>(model: Model<T>) => {
   return new BaseController(model);
 };

@@ -14,9 +14,7 @@ export interface IPost extends Document {
   comments: mongoose.Types.ObjectId[]; 
 }
 
-/**
- * Post model Schema
- */
+// Post model Schema
 const postSchema = new Schema<IPost>(
   {
     title: {
