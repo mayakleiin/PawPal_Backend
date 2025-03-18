@@ -3,8 +3,9 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import path from "path";
-import cors from "cors"; // Enable CORS for cross-origin requests
-import postRoutes from "./routes/post_route"; // Import post routes
+import cors from "cors"; 
+import postRoutes from "./routes/post_route"; 
+import commentRoutes from "./routes/comment_route"; 
 
 dotenv.config();
 const app = express();
@@ -25,10 +26,11 @@ const initApp = (): Promise<Express> => {
         .then(() => {
           app.use(bodyParser.json());
           app.use(bodyParser.urlencoded({ extended: true }));
-          app.use(cors()); //Enables CORS for all routes
+          app.use(cors()); // Enables CORS for all routes
 
-          //Register API routes
+          // Register API routes
           app.use("/posts", postRoutes); // Connect the post routes
+          app.use("/comments", commentRoutes); // Connect the comment routes
           app.use(
             "/uploads",
             express.static(path.join(__dirname, "../uploads"))

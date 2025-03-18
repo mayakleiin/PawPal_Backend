@@ -1,8 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-/**
- * Interface for a Comment document in MongoDB
- */
+// Interface for a Comment document in MongoDB
 export interface IComment extends Document {
   content: string;
   owner: mongoose.Types.ObjectId;
@@ -17,7 +15,7 @@ const commentSchema = new Schema<IComment>(
     content: {
       type: String,
       required: true,
-      trim: true, // Ensures no extra spaces
+      trim: true, 
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
@@ -30,7 +28,7 @@ const commentSchema = new Schema<IComment>(
       required: true,
     },
   },
-  { timestamps: true } // Automatically adds createdAt and updatedAt fields
+  { timestamps: true } 
 );
 
 const CommentModel = mongoose.model<IComment>("Comments", commentSchema);
