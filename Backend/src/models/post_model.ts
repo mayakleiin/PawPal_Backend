@@ -2,11 +2,11 @@ import mongoose, { Document, Schema } from "mongoose";
 
 // Interface that defines the structure of a Post document
 export interface IPost extends Document {
-  title: string; 
-  content: string; 
-  owner: mongoose.Types.ObjectId; 
-  createdAt: Date; 
-  updatedAt: Date; 
+  title: string;
+  content: string;
+  owner: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
   likes: mongoose.Types.ObjectId[]; 
   comments: mongoose.Types.ObjectId[]; 
 }
@@ -17,7 +17,7 @@ const postSchema = new Schema<IPost>(
     title: {
       type: String,
       required: true,
-      trim: true, 
+      trim: true,
     },
     content: {
       type: String,
@@ -25,24 +25,24 @@ const postSchema = new Schema<IPost>(
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", 
+      ref: "User",
       required: true,
     },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", 
+        ref: "User",
       },
     ],
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Comment", 
+        ref: "Comment",
       },
     ],
   },
   {
-    timestamps: true, 
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
 
