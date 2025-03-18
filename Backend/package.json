@@ -14,6 +14,7 @@
     "testPost": "tsc && jest --detectOpenHandles --forceExit post.test.ts",
     "testComment": "tsc && jest --detectOpenHandles --forceExit comment.test.ts",
     "testUser": "tsc && jest --detectOpenHandles --forceExit user.test.ts",
+    "testPlaydate": "tsc && jest --detectOpenHandles --forceExit playdate.test.ts",
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {

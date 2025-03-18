@@ -6,7 +6,8 @@ import path from "path";
 import authRoutes from "./routes/auth_route";
 import userRoutes from "./routes/user_route";
 import postRoutes from "./routes/post_route";
-import CommentRoutes from "./routes/comment_route";
+import commentRoutes from "./routes/comment_route";
+import PlaydateRoutes from "./routes/playdate_route";
 
 dotenv.config();
 const app = express();
@@ -21,7 +22,8 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
-app.use("/api/comments", CommentRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/playdates", PlaydateRoutes);
 
 const initApp = (): Promise<Express> => {
   return new Promise<Express>((resolve, reject) => {
