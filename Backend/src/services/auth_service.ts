@@ -1,7 +1,6 @@
 import User, { IUser } from "../models/user_model";
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import logger from "../utils/logger";
 
 interface TokenPayload extends JwtPayload {
   _id: string;
@@ -91,26 +90,20 @@ const login = async ({
   password,
 }: {
   email: string;
-  password: string | "";
+  password: string;
 }) => {
   const user = await User.findOne({ email: email });
-  if (!user) {
-    throw new Error("Incorrect email or password");
-  }
-  let isMatch = await bcrypt.compare(password, user.password);
-  if (password === "" && user.password === "") {
-    isMatch = true;
-  }
-  if (!isMatch) {
-    throw new Error("Incorrect email or password");
-  }
+  if (!user) throw new Error("Incorrect email or password");
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) throw new Error("Incorrect email or password");
+
   const tokens = await generateTokens(user);
-  if (!user.refreshToken) {
-    user.refreshToken = [];
-    await user.save();
-  }
-  user.refreshToken.push(tokens.refreshToken);
+
+  // Clear old tokens & save only new one
+  user.refreshToken = [tokens.refreshToken];
   await user.save();
+
   return {
     user,
     accessToken: tokens.accessToken,
@@ -120,7 +113,6 @@ const login = async ({
 
 // Logout user
 const logout = async (refreshToken: string) => {
-  logger.info("refreshToken in logout " + refreshToken);
   const user = await validateRefreshToken(refreshToken);
   user.refreshToken = (user.refreshToken || []).filter(
     (token) => token !== refreshToken
@@ -130,16 +122,21 @@ const logout = async (refreshToken: string) => {
 
 // Refresh token
 const refresh = async (refreshToken: string) => {
-  if (!refreshToken) {
-    throw new Error("Refresh token is required");
-  }
+  if (!refreshToken) throw new Error("Refresh token is required");
+
   const user = await validateRefreshToken(refreshToken);
-  const tokens = await generateTokens(user);
+
+  // Remove old refresh token
   user.refreshToken = (user.refreshToken || []).filter(
     (token) => token !== refreshToken
   );
+
+  const tokens = await generateTokens(user);
+
+  // Save new refresh token
   user.refreshToken.push(tokens.refreshToken);
   await user.save();
+
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
 };
 

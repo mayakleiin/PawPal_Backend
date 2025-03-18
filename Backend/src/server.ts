@@ -3,9 +3,21 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import path from "path";
+import authRoutes from "./routes/auth_route";
+import userRoutes from "./routes/user_route";
 
 dotenv.config();
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get("/", (_req, res) => {
+  res.send("PawPal API is running");
+});
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 const initApp = (): Promise<Express> => {
   return new Promise<Express>((resolve, reject) => {
@@ -21,18 +33,6 @@ const initApp = (): Promise<Express> => {
       mongoose
         .connect(process.env.DB_CONNECT)
         .then(() => {
-          app.use(bodyParser.json());
-          app.use(bodyParser.urlencoded({ extended: true }));
-
-          app.use(
-            "/uploads",
-            express.static(path.join(__dirname, "../uploads"))
-          );
-
-          app.get("/", (_req, res) => {
-            res.send("PawPal API is running");
-          });
-
           resolve(app);
         })
 
