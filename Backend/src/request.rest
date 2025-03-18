@@ -10,7 +10,7 @@ Content-Type: application/json
 
 {
   "name": "Maya Klein",
-  "email": "maya@example.com",
+  "email": "hey@example.com",
   "password": "123456"
 }
 
@@ -30,24 +30,24 @@ Content-Type: application/json
 ### ===== POSTS REQUESTS ===== ###
 
 ### Get All Posts
-GET {{baseUrl}}/posts
+GET {{baseUrl}}/api/posts
 
 ###
 
 ### Get Post by ID
-GET {{baseUrl}}/posts/{{postId}}
+GET {{baseUrl}}/api/posts/{{postId}}
 
 ###
 
 ### ===== COMMENTS REQUESTS ===== ###
 
 ### Get All Comments
-GET {{baseUrl}}/comments
+GET {{baseUrl}}/api/comments
 
 ###
 
 ### Get Comment by ID
-GET {{baseUrl}}/comments/{{commentId}}
+GET {{baseUrl}}/api/comments/{{commentId}}
 
 ###
 
