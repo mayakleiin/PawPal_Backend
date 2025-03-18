@@ -8,23 +8,26 @@ interface TokenPayload extends JwtPayload {
 }
 
 // Generate tokens (Access & Refresh)
-const generateTokens = async (user: IUser) => {
-  if (!process.env.TOKEN_SECRET) {
-    throw new Error("TOKEN_SECRET is not defined");
-  }
-  const random = Math.random().toString(36).substring(2);
+function generateTokens(user: IUser) {
+  const random = Math.floor(Math.random() * 1000000);
+
   const accessToken = jwt.sign(
     { _id: user._id, random },
-    process.env.TOKEN_SECRET,
-    { expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRATION as string, 10) }
+    process.env.TOKEN_SECRET as string,
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRATION,
+    }
   );
+
+  if (!process.env.TOKEN_SECRET) throw new Error("TOKEN_SECRET is not defined");
   const refreshToken = jwt.sign(
     { _id: user._id, random },
     process.env.TOKEN_SECRET,
-    { expiresIn: parseInt(process.env.REFRESH_TOKEN_EXPIRATION as string, 10) }
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
   );
+
   return { accessToken, refreshToken };
-};
+}
 
 // Verify token function
 export const verifyToken = async (
@@ -76,7 +79,7 @@ const register = async ({
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   const user = await User.create({
-    name,
+    fullName: name,
     email,
     password: hashedPassword,
     ...rest,

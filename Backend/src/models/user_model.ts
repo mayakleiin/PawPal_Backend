@@ -16,12 +16,12 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
-  _id?: string;
   city?: string;
   gender?: "Male" | "Female" | "Other";
   profileImage?: string;
-  refreshToken?: string[];
   dogs: IDog[];
+  _id?: string;
+  refreshToken?: string[];
 }
 
 // Dog Schema
@@ -58,8 +58,11 @@ const userSchema = new Schema<IUser>({
     type: String,
     default: "/uploads/users/user_default.png",
   },
-  refreshToken: { type: [String], default: [] },
   dogs: [dogSchema],
+  refreshToken: {
+    type: [String],
+    default: [],
+  },
 });
 
 const User = mongoose.model<IUser>("Users", userSchema);
