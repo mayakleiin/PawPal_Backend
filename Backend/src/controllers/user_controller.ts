@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import userService from "../services/user_service";
 import logger from "../utils/logger";
+import mongoose from "mongoose";
 
 // Get All Users
 const getAllUsers = async (_req: Request, res: Response) => {
@@ -17,6 +18,13 @@ const getAllUsers = async (_req: Request, res: Response) => {
 const getUserById = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
+
+    // New check
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      res.status(400).json({ message: "Invalid User ID format" });
+      return;
+    }
+
     const user = await userService.getUserById(userId);
     if (!user) {
       res.status(404).json({ message: "User not found" });
@@ -33,6 +41,13 @@ const getUserById = async (req: Request, res: Response) => {
 const updateUserDetails = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
+
+    // Check ownership
+    if (req.query.userId !== userId) {
+      res.status(401).json({ message: "Unauthorized to update this user" });
+      return;
+    }
+
     const updatedUser = await userService.updateUserDetails(userId, req.body);
     if (!updatedUser) {
       res.status(404).json({ message: "User not found" });
@@ -49,6 +64,13 @@ const updateUserDetails = async (req: Request, res: Response) => {
 const deleteUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
+
+    // Check ownership
+    if (req.query.userId !== userId) {
+      res.status(401).json({ message: "Unauthorized to delete this user" });
+      return;
+    }
+
     const deletedUser = await userService.deleteUser(userId);
     if (!deletedUser) {
       res.status(404).json({ message: "User not found" });

@@ -1,78 +1,158 @@
 import request from "supertest";
-import initApp from "../server";
 import mongoose from "mongoose";
+import initApp from "../server";
+import postModel from "../models/post_model";
+import userModel from "../models/user_model";
+import commentModel from "../models/comment_model";
+import { Express } from "express";
 
-let app: any;
-let token: string;
-let commentId: string;
-let postId = "6603ab12c2f3e66f1a1b1234"; // Example post ID
+let app: Express;
+
+const testUser = {
+  name: "Test User",
+  email: "testuser@example.com",
+  password: "123456",
+};
+
+const secondUser = {
+  name: "Second User",
+  email: "seconduser@example.com",
+  password: "123456",
+};
+
+const tokens = {
+  accessToken: "",
+  userId: "",
+};
+
+const secondTokens = {
+  accessToken: "",
+  userId: "",
+};
+
+let postId = "";
+let commentId = "";
 
 beforeAll(async () => {
   app = await initApp();
+  await postModel.deleteMany({});
+  await userModel.deleteMany({});
+  await commentModel.deleteMany({});
 
-  // Authenticate and retrieve a valid token
-  const authResponse = await request(app)
-    .post("/auth/login")
-    .send({ email: "user@example.com", password: "password123" });
+  // Register & login first user
+  const regRes = await request(app).post("/api/auth/register").send(testUser);
+  expect(regRes.statusCode).toBe(200);
+  const loginRes = await request(app).post("/api/auth/login").send({
+    email: testUser.email,
+    password: testUser.password,
+  });
+  tokens.accessToken = loginRes.body.accessToken;
+  tokens.userId = loginRes.body.user._id;
 
-  token = authResponse.body.token;
+  // Register & login second user
+  const regRes2 = await request(app)
+    .post("/api/auth/register")
+    .send(secondUser);
+  expect(regRes2.statusCode).toBe(200);
+  const loginRes2 = await request(app).post("/api/auth/login").send({
+    email: secondUser.email,
+    password: secondUser.password,
+  });
+  secondTokens.accessToken = loginRes2.body.accessToken;
+  secondTokens.userId = loginRes2.body.user._id;
+
+  // Create post
+  const postRes = await request(app)
+    .post("/api/posts")
+    .set("Authorization", `Bearer ${tokens.accessToken}`)
+    .send({ title: "Post for comments", content: "Testing comments" });
+  postId = postRes.body._id;
 });
 
 afterAll(async () => {
   await mongoose.connection.close();
 });
 
-// Create a new comment
-test("Should create a new comment", async () => {
-  const response = await request(app)
-    .post("/comments")
-    .set("Authorization", `Bearer ${token}`)
-    .send({
-      content: "This is a test comment",
-      postId: postId,
-    });
+describe("Comments Test Suite", () => {
+  test("Get all comments - empty initially", async () => {
+    const res = await request(app).get("/api/comments");
+    expect(res.statusCode).toBe(200);
+    expect(res.body.length).toBe(0);
+  });
 
-  expect(response.status).toBe(201);
-  expect(response.body).toHaveProperty("_id");
-  expect(response.body.content).toBe("This is a test comment");
+  test("Create comment - Success", async () => {
+    const res = await request(app)
+      .post("/api/comments")
+      .set("Authorization", `Bearer ${tokens.accessToken}`)
+      .send({ content: "First comment", postId });
+    expect(res.statusCode).toBe(201);
+    expect(res.body.content).toBe("First comment");
+    commentId = res.body._id;
+  });
 
-  commentId = response.body._id;
-});
+  test("Create comment - Fail without token", async () => {
+    const res = await request(app)
+      .post("/api/comments")
+      .send({ content: "No token", postId });
+    expect(res.statusCode).toBe(401);
+  });
 
-// Fetch all comments
-test("Should fetch all comments", async () => {
-  const response = await request(app).get("/comments");
+  test("Get comment by ID - Success", async () => {
+    const res = await request(app).get(`/api/comments/${commentId}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body._id).toBe(commentId);
+  });
 
-  expect(response.status).toBe(200);
-  expect(Array.isArray(response.body)).toBe(true);
-});
+  test("Update comment - Success", async () => {
+    const res = await request(app)
+      .put(`/api/comments/${commentId}`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`)
+      .send({ content: "Updated comment" });
+    expect(res.statusCode).toBe(200);
+    expect(res.body.content).toBe("Updated comment");
+  });
 
-// Fetch a single comment by ID
-test("Should fetch a single comment by ID", async () => {
-  const response = await request(app).get(`/comments/${commentId}`);
+  test("Update comment - Fail with second user token", async () => {
+    const res = await request(app)
+      .put(`/api/comments/${commentId}`)
+      .set("Authorization", `Bearer ${secondTokens.accessToken}`)
+      .send({ content: "Should not update" });
+    expect(res.statusCode).toBe(401);
+  });
 
-  expect(response.status).toBe(200);
-  expect(response.body._id).toBe(commentId);
-});
+  test("Delete comment - Fail with second user token", async () => {
+    const res = await request(app)
+      .delete(`/api/comments/${commentId}`)
+      .set("Authorization", `Bearer ${secondTokens.accessToken}`);
+    expect(res.statusCode).toBe(401);
+  });
 
-// Update a comment
-test("Should update a comment", async () => {
-  const response = await request(app)
-    .put(`/comments/${commentId}`)
-    .set("Authorization", `Bearer ${token}`)
-    .send({
-      content: "Updated test comment",
-    });
+  test("Delete comment - Success", async () => {
+    const res = await request(app)
+      .delete(`/api/comments/${commentId}`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+    expect(res.statusCode).toBe(200);
+  });
 
-  expect(response.status).toBe(200);
-  expect(response.body.content).toBe("Updated test comment");
-});
+  test("Delete comment - Already deleted", async () => {
+    const res = await request(app)
+      .delete(`/api/comments/${commentId}`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+    expect(res.statusCode).toBe(404);
+  });
 
-// Delete a comment
-test("Should delete a comment", async () => {
-  const response = await request(app)
-    .delete(`/comments/${commentId}`)
-    .set("Authorization", `Bearer ${token}`);
+  test("Update comment - Fail invalid token", async () => {
+    const res = await request(app)
+      .put(`/api/comments/${commentId}`)
+      .set("Authorization", "Bearer invalidtoken")
+      .send({ content: "Fail" });
+    expect(res.statusCode).toBe(401);
+  });
 
-  expect(response.status).toBe(200);
+  test("Delete comment - Fail invalid token", async () => {
+    const res = await request(app)
+      .delete(`/api/comments/${commentId}`)
+      .set("Authorization", "Bearer invalidtoken");
+    expect(res.statusCode).toBe(401);
+  });
 });
