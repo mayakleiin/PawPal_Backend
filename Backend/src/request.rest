@@ -1,7 +1,11 @@
+@baseUrl = http://localhost:3000
+@postId = 1234567890abcdef12345678
+@commentId = 1234567890abcdef12345678
+
 ### ===== AUTH REQUESTS ===== ###
 
 ### Register
-POST http://localhost:3000/api/auth/register
+POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
@@ -13,7 +17,7 @@ Content-Type: application/json
 ###
 
 ### Login
-POST http://localhost:3000/api/auth/login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
@@ -23,6 +27,27 @@ Content-Type: application/json
 
 ###
 
-=======
-GET http://localhost:3000/
+### ===== POSTS REQUESTS ===== ###
+
+### Get All Posts
+GET {{baseUrl}}/posts
+
+###
+
+### Get Post by ID
+GET {{baseUrl}}/posts/{{postId}}
+
+###
+
+### ===== COMMENTS REQUESTS ===== ###
+
+### Get All Comments
+GET {{baseUrl}}/comments
+
+###
+
+### Get Comment by ID
+GET {{baseUrl}}/comments/{{commentId}}
+
+###
 

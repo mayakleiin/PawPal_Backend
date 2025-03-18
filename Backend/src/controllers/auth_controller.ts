@@ -12,7 +12,7 @@ const register = async (req: Request, res: Response) => {
     const user = await authService.register({ name, email, password });
     res.status(200).json({
       message: "User registered successfully",
-      user: { id: user._id, email: user.email, name: user.fullName },
+      user: { id: user._id, email: user.email, name: user.name },
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
