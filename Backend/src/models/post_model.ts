@@ -1,9 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-/**
- * Interface that defines the structure of a Post document.
- * This ensures type safety when interacting with posts.
- */
+// Interface that defines the structure of a Post document
 export interface IPost extends Document {
   title: string; 
   content: string; 
@@ -14,15 +11,13 @@ export interface IPost extends Document {
   comments: mongoose.Types.ObjectId[]; 
 }
 
-/**
- * Post model Schema
- */
+// Post model Schema
 const postSchema = new Schema<IPost>(
   {
     title: {
       type: String,
       required: true,
-      trim: true, // Removes unnecessary spaces from input
+      trim: true, 
     },
     content: {
       type: String,
@@ -47,7 +42,7 @@ const postSchema = new Schema<IPost>(
     ],
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    timestamps: true, 
   }
 );
 

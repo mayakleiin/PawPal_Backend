@@ -5,7 +5,10 @@ import bodyParser from "body-parser";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import path from "path";
-import authRoutes from "./routes/auth_route";
+import cors from "cors"; 
+import postRoutes from "./routes/post_route"; 
+import commentRoutes from "./routes/comment_route"; 
+
 
 import postRoutes from "./routes/post_route"; // Import post routes
 dotenv.config();
@@ -45,9 +48,6 @@ const initApp = async () => {
     if (!process.env.DB_CONNECT) {
       reject("No DB_CONNECT");
     } else {
-      mongoose.connect(process.env.DB_CONNECT).then(() => {
-        resolve(app);
-      });
     }
   });
 };
