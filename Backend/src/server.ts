@@ -2,52 +2,43 @@ import express, { Express } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import swaggerJsDoc from "swagger-jsdoc";
-import swaggerUI from "swagger-ui-express";
 import path from "path";
-import cors from "cors"; 
-import postRoutes from "./routes/post_route"; 
-import commentRoutes from "./routes/comment_route"; 
+import authRoutes from "./routes/auth_route";
+import userRoutes from "./routes/user_route";
 
-
-import postRoutes from "./routes/post_route"; // Import post routes
 dotenv.config();
 const app = express();
 
-app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/posts", postRoutes);
+
+app.get("/", (_req, res) => {
+  res.send("PawPal API is running");
+});
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
-const options = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Web Dev 2025 REST API",
-      version: "1.0.0",
-      description: "REST server including authentication using JWT",
-    },
-    servers: [{ url: "http://localhost:3000" }],
-  },
-  apis: ["./src/routes/*.ts"],
-};
-const specs = swaggerJsDoc(options);
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
-
-const initApp = async () => {
+const initApp = (): Promise<Express> => {
   return new Promise<Express>((resolve, reject) => {
     const db = mongoose.connection;
-    db.on("error", (error) => {
-      console.error(error);
-    });
+    db.on("error", console.error.bind(console, "connection error:"));
     db.once("open", function () {
-      console.log("Connected to Mongoose");
+      console.log("Connected to the database");
     });
+
     if (!process.env.DB_CONNECT) {
-      reject("No DB_CONNECT");
+      reject("DB_CONNECT is not defined");
     } else {
+      mongoose
+        .connect(process.env.DB_CONNECT)
+        .then(() => {
+          resolve(app);
+        })
+
+        .catch((err: unknown) => {
+          reject(err);
+        });
     }
   });
 };

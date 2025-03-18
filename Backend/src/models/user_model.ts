@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 // Interface for Dog
-interface IDog {
+export interface IDog {
   name: string;
   birthYear: number;
   birthMonth: number;
@@ -13,7 +13,7 @@ interface IDog {
 
 // Interface for User
 export interface IUser {
-  fullName: string;
+  name: string;
   email: string;
   password: string;
   city?: string;
@@ -49,7 +49,7 @@ dogSchema.virtual("age").get(function () {
 
 // User Schema
 const userSchema = new Schema<IUser>({
-  fullName: { type: String, required: true },
+  name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   city: { type: String },
