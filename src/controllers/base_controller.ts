@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Model, Document, Types } from "mongoose";
+import { getPagination } from "../utils/pagination";
 
 interface Ownable {
   owner: Types.ObjectId;
@@ -23,13 +24,23 @@ export class BaseController<T extends Document & Ownable> {
     }
   }
 
-  // Get all items
+  // Get all items with paging
   async getAll(req: Request, res: Response) {
     try {
       const ownerFilter = req.query.owner as string;
       const query = ownerFilter ? { owner: ownerFilter } : {};
-      const items = await this.model.find(query);
-      res.status(200).json(items);
+
+      const { skip, limit } = getPagination(req.query);
+
+      const items = await this.model.find(query).skip(skip).limit(limit);
+      const totalItems = await this.model.countDocuments(query);
+
+      res.status(200).json({
+        items,
+        currentPage: parseInt(req.query.page as string) || 1,
+        totalPages: Math.ceil(totalItems / limit),
+        totalItems,
+      });
     } catch (error) {
       res.status(400).json({ error: "Failed to fetch items", details: error });
     }
