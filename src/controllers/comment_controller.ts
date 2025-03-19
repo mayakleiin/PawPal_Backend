@@ -1,6 +1,5 @@
-import CommentModel, { IComment } from "../models/comment_model"; 
-import createController from "./base_controller"; 
-
+import CommentModel, { IComment } from "../models/comment_model";
+import createController from "./base_controller";
 
 const commentController = createController<IComment>(CommentModel);
 

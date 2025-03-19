@@ -1,11 +1,9 @@
 import { Request, Response } from "express";
 import { Model, Document, Types } from "mongoose";
 
-
 interface Ownable {
   owner: Types.ObjectId;
 }
-
 
 export class BaseController<T extends Document & Ownable> {
   constructor(private model: Model<T>) {}
@@ -14,11 +12,14 @@ export class BaseController<T extends Document & Ownable> {
   async create(req: Request, res: Response) {
     try {
       const userId = req.query.userId as string;
-      const newItem = new this.model({ ...req.body, owner: new Types.ObjectId(userId) });
+      const newItem = new this.model({
+        ...req.body,
+        owner: new Types.ObjectId(userId),
+      });
       const savedItem = await newItem.save();
-      res.status(201).json(savedItem); 
+      res.status(201).json(savedItem);
     } catch (error) {
-      res.status(400).json({ error: "Failed to create item", details: error }); 
+      res.status(400).json({ error: "Failed to create item", details: error });
     }
   }
 
@@ -28,9 +29,9 @@ export class BaseController<T extends Document & Ownable> {
       const ownerFilter = req.query.owner as string;
       const query = ownerFilter ? { owner: ownerFilter } : {};
       const items = await this.model.find(query);
-      res.status(200).json(items); 
+      res.status(200).json(items);
     } catch (error) {
-      res.status(400).json({ error: "Failed to fetch items", details: error }); 
+      res.status(400).json({ error: "Failed to fetch items", details: error });
     }
   }
 
@@ -40,12 +41,12 @@ export class BaseController<T extends Document & Ownable> {
       const { id } = req.params;
       const item = await this.model.findById(id);
       if (item) {
-        res.status(200).json(item); 
+        res.status(200).json(item);
       } else {
-        res.status(404).json({ error: "Item not found" }); 
+        res.status(404).json({ error: "Item not found" });
       }
     } catch (error) {
-      res.status(400).json({ error: "Failed to fetch item", details: error }); 
+      res.status(400).json({ error: "Failed to fetch item", details: error });
     }
   }
 
@@ -57,12 +58,12 @@ export class BaseController<T extends Document & Ownable> {
 
       const currentItem = await this.model.findById(id);
       if (!currentItem) {
-        res.status(404).json({ error: "Item not found" }); 
+        res.status(404).json({ error: "Item not found" });
         return;
       }
 
       if (currentItem.owner.toString() !== userId) {
-        res.status(401).json({ error: "Unauthorized to update this item" }); 
+        res.status(401).json({ error: "Unauthorized to update this item" });
         return;
       }
 
@@ -71,9 +72,9 @@ export class BaseController<T extends Document & Ownable> {
         runValidators: true,
       });
 
-      res.status(200).json(updatedItem); 
+      res.status(200).json(updatedItem);
     } catch (error) {
-      res.status(400).json({ error: "Failed to update item", details: error }); 
+      res.status(400).json({ error: "Failed to update item", details: error });
     }
   }
 
@@ -85,17 +86,17 @@ export class BaseController<T extends Document & Ownable> {
 
       const currentItem = await this.model.findById(id);
       if (!currentItem) {
-        res.status(404).json({ error: "Item not found" }); 
+        res.status(404).json({ error: "Item not found" });
         return;
       }
 
       if (currentItem.owner.toString() !== userId) {
-        res.status(401).json({ error: "Unauthorized to delete this item" }); 
+        res.status(401).json({ error: "Unauthorized to delete this item" });
         return;
       }
 
       await this.model.findByIdAndDelete(id);
-      res.status(200).json({ message: "Item deleted successfully" }); 
+      res.status(200).json({ message: "Item deleted successfully" });
     } catch (error) {
       res.status(400).json({ error: "Failed to delete item", details: error });
     }

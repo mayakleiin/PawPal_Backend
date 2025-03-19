@@ -7,8 +7,8 @@ export interface IPost extends Document {
   owner: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
-  likes: mongoose.Types.ObjectId[]; 
-  comments: mongoose.Types.ObjectId[]; 
+  likes: mongoose.Types.ObjectId[];
+  comments: mongoose.Types.ObjectId[];
 }
 
 // Post model Schema

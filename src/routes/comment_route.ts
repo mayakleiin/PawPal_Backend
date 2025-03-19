@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
 import commentController from "../controllers/comment_controller";
-import { authMiddleware } from "../middleware/auth_middleware"; 
+import { authMiddleware } from "../middleware/auth_middleware";
 
 /**
  * @swagger
@@ -37,7 +37,11 @@ import { authMiddleware } from "../middleware/auth_middleware";
  */
 
 // Create a new comment (requires authentication)
-router.post("/", authMiddleware, commentController.create.bind(commentController));
+router.post(
+  "/",
+  authMiddleware,
+  commentController.create.bind(commentController)
+);
 
 /**
  * @swagger
@@ -128,7 +132,11 @@ router.get("/:id", commentController.getById.bind(commentController)); // Get a 
  *       500:
  *         description: Internal server error
  */
-router.put("/:id", authMiddleware, commentController.update.bind(commentController)); // Update a comment
+router.put(
+  "/:id",
+  authMiddleware,
+  commentController.update.bind(commentController)
+); // Update a comment
 
 /**
  * @swagger
@@ -156,6 +164,10 @@ router.put("/:id", authMiddleware, commentController.update.bind(commentControll
  *       500:
  *         description: Internal server error
  */
-router.delete("/:id", authMiddleware, commentController.delete.bind(commentController)); // Delete a comment
+router.delete(
+  "/:id",
+  authMiddleware,
+  commentController.delete.bind(commentController)
+); // Delete a comment
 
 export default router;

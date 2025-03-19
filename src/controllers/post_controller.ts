@@ -3,7 +3,7 @@ import createController, { BaseController } from "./base_controller";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { getPagination } from "../utils/pagination";
-import logger from "../utils/logger"; 
+import logger from "../utils/logger";
 
 // Create base controller
 const basePostsController = createController<IPost>(PostModel);
@@ -29,14 +29,18 @@ class PostsController extends BaseController<IPost> {
       const totalPosts = await PostModel.countDocuments();
 
       // Log pagination request details
-      logger.info(`Fetched ${posts.length} posts (Page: ${req.query.page || 1}, Limit: ${limit})`);
+      logger.info(
+        `Fetched ${posts.length} posts (Page: ${
+          req.query.page || 1
+        }, Limit: ${limit})`
+      );
 
       // Send paginated response
       res.status(200).json({
         posts,
         currentPage: parseInt(req.query.page as string) || 1,
         totalPages: Math.ceil(totalPosts / limit),
-        totalPosts
+        totalPosts,
       });
     } catch (error) {
       logger.error("Error fetching paginated posts:", error);
@@ -64,7 +68,9 @@ class PostsController extends BaseController<IPost> {
       post.likes.push(new mongoose.Types.ObjectId(userId));
       await post.save();
 
-      res.status(200).json({ message: "Post liked", likesCount: post.likes.length });
+      res
+        .status(200)
+        .json({ message: "Post liked", likesCount: post.likes.length });
     } catch (error) {
       res.status(400).json({ error: "Failed to like post", details: error });
     }
@@ -92,7 +98,9 @@ class PostsController extends BaseController<IPost> {
       post.likes = post.likes.filter((uid) => uid.toString() !== userId);
       await post.save();
 
-      res.status(200).json({ message: "Post unliked", likesCount: post.likes.length });
+      res
+        .status(200)
+        .json({ message: "Post unliked", likesCount: post.likes.length });
     } catch (error) {
       res.status(400).json({ error: "Failed to unlike post", details: error });
     }
