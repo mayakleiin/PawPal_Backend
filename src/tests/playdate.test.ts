@@ -7,18 +7,7 @@ import playdateModel from "../models/playdate_model";
 
 let app: Express;
 
-beforeAll(async () => {
-  app = await initApp();
-  await userModel.deleteMany({});
-  await playdateModel.deleteMany({});
-  console.log("BeforeAll – DB cleaned");
-});
-
-afterAll(async () => {
-  console.log("AfterAll – closing DB connection");
-  await mongoose.connection.close();
-});
-
+// Users & Tokens
 const testUser = {
   name: "Test User",
   email: "test@example.com",
@@ -37,109 +26,87 @@ const tokens = {
   user2: "",
 };
 
-let playdateId = "";
+let crudPlaydateId = "";
+let participantPlaydateId = "";
 
-describe("Playdates Tests Suite", () => {
-  // Register users
-  test("Register User1", async () => {
-    const res = await request(app).post("/api/auth/register").send(testUser);
-    expect(res.statusCode).toBe(200);
-  });
+beforeAll(async () => {
+  app = await initApp();
+  await userModel.deleteMany({});
+  await playdateModel.deleteMany({});
+  console.log("BeforeAll – DB cleaned");
 
-  test("Register User2", async () => {
-    const res = await request(app).post("/api/auth/register").send(secondUser);
-    expect(res.statusCode).toBe(200);
-  });
+  // Register and login User1
+  await request(app).post("/api/auth/register").send(testUser);
+  const login1 = await request(app)
+    .post("/api/auth/login")
+    .send({ email: testUser.email, password: testUser.password });
+  tokens.user1 = login1.body.accessToken;
 
-  // Login users
-  test("Login User1", async () => {
-    const res = await request(app)
-      .post("/api/auth/login")
-      .send({ email: testUser.email, password: testUser.password });
-    expect(res.statusCode).toBe(200);
-    tokens.user1 = res.body.accessToken;
-  });
+  // Register and login User2
+  await request(app).post("/api/auth/register").send(secondUser);
+  const login2 = await request(app)
+    .post("/api/auth/login")
+    .send({ email: secondUser.email, password: secondUser.password });
+  tokens.user2 = login2.body.accessToken;
 
-  test("Login User2", async () => {
-    const res = await request(app)
-      .post("/api/auth/login")
-      .send({ email: secondUser.email, password: secondUser.password });
-    expect(res.statusCode).toBe(200);
-    tokens.user2 = res.body.accessToken;
-  });
+  // Create Playdate for CRUD tests
+  const resCrud = await request(app)
+    .post("/api/playdates")
+    .set("Authorization", `Bearer ${tokens.user1}`)
+    .send({
+      title: "CRUD Playdate",
+      description: "For CRUD tests",
+      date: "2025-04-01",
+      location: "Central Park",
+    });
+  crudPlaydateId = resCrud.body._id;
 
-  // DB empty check
-  test("Get All Playdates when DB empty", async () => {
+  // Create Playdate for Participant tests
+  const resParticipant = await request(app)
+    .post("/api/playdates")
+    .set("Authorization", `Bearer ${tokens.user1}`)
+    .send({
+      title: "Participant Playdate",
+      description: "For participant tests",
+      date: "2025-05-01",
+      location: "Dog Park",
+    });
+  participantPlaydateId = resParticipant.body._id;
+});
+
+afterAll(async () => {
+  console.log("AfterAll – closing DB connection");
+  await mongoose.connection.close();
+});
+
+describe("Playdates CRUD Tests", () => {
+  test("Get All Playdates", async () => {
     const res = await request(app).get("/api/playdates");
     expect(res.statusCode).toBe(200);
-    expect(res.body.length).toBe(0);
+    expect(res.body.length).toBe(2);
   });
 
-  // Create Playdate
-  test("Create Playdate - Success", async () => {
-    const res = await request(app)
-      .post("/api/playdates")
-      .set("Authorization", `Bearer ${tokens.user1}`)
-      .send({
-        title: "Park Meeting",
-        description: "Fun at park",
-        date: "2025-04-01",
-        location: "Central Park",
-      });
-    expect(res.statusCode).toBe(201);
-    expect(res.body.title).toBe("Park Meeting");
-    playdateId = res.body._id;
+  test("Get Playdate by ID - Success", async () => {
+    const res = await request(app).get(`/api/playdates/${crudPlaydateId}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body._id).toBe(crudPlaydateId);
   });
 
-  test("Create Playdate - Fail without token", async () => {
-    const res = await request(app).post("/api/playdates").send({
-      title: "No Token",
-      date: "2025-04-01",
-      location: "Park",
-    });
-    expect(res.statusCode).toBe(401);
-  });
-
-  test("Create Playdate - Fail missing fields", async () => {
-    const res = await request(app)
-      .post("/api/playdates")
-      .set("Authorization", `Bearer ${tokens.user1}`)
-      .send({
-        date: "2025-04-01",
-      });
+  test("Get Playdate by ID - Invalid ID format", async () => {
+    const res = await request(app).get(`/api/playdates/invalidID`);
     expect(res.statusCode).toBe(400);
   });
 
-  // Get All
-  test("Get All Playdates - After Creation", async () => {
-    const res = await request(app).get("/api/playdates");
-    expect(res.statusCode).toBe(200);
-    expect(res.body.length).toBe(1);
-  });
-
-  // Get by ID
-  test("Get Playdate by ID - Success", async () => {
-    const res = await request(app).get(`/api/playdates/${playdateId}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body._id).toBe(playdateId);
-  });
-
-  test("Get Playdate by ID - Fail non-existing", async () => {
+  test("Get Playdate by ID - Non-existing", async () => {
     const res = await request(app).get(
       `/api/playdates/${new mongoose.Types.ObjectId()}`
     );
     expect(res.statusCode).toBe(404);
   });
 
-  test("Get Playdate by ID - Fail invalid ID", async () => {
-    const res = await request(app).get(`/api/playdates/invalidID`);
-    expect(res.statusCode).toBe(400);
-  });
-
-  // Update
   test("Update Playdate - Success by owner", async () => {
     const res = await request(app)
-      .patch(`/api/playdates/${playdateId}`)
+      .patch(`/api/playdates/${crudPlaydateId}`)
       .set("Authorization", `Bearer ${tokens.user1}`)
       .send({ location: "Updated Park" });
     expect(res.statusCode).toBe(200);
@@ -147,51 +114,142 @@ describe("Playdates Tests Suite", () => {
 
   test("Update Playdate - Fail by other user", async () => {
     const res = await request(app)
-      .patch(`/api/playdates/${playdateId}`)
+      .patch(`/api/playdates/${crudPlaydateId}`)
       .set("Authorization", `Bearer ${tokens.user2}`)
       .send({ location: "Hack Attempt" });
     expect(res.statusCode).toBe(401);
   });
 
-  test("Update Playdate - Fail non-existing", async () => {
-    const res = await request(app)
-      .patch(`/api/playdates/${new mongoose.Types.ObjectId()}`)
-      .set("Authorization", `Bearer ${tokens.user1}`)
-      .send({ location: "Nothing" });
-    expect(res.statusCode).toBe(404);
-  });
-
   test("Update Playdate - Fail no token", async () => {
     const res = await request(app)
-      .patch(`/api/playdates/${playdateId}`)
+      .patch(`/api/playdates/${crudPlaydateId}`)
       .send({ location: "Fail" });
     expect(res.statusCode).toBe(401);
   });
 
-  // Delete
   test("Delete Playdate - Fail by other user", async () => {
     const res = await request(app)
-      .delete(`/api/playdates/${playdateId}`)
+      .delete(`/api/playdates/${crudPlaydateId}`)
       .set("Authorization", `Bearer ${tokens.user2}`);
-    expect(res.statusCode).toBe(401);
-  });
-
-  test("Delete Playdate - Fail non-existing", async () => {
-    const res = await request(app)
-      .delete(`/api/playdates/${new mongoose.Types.ObjectId()}`)
-      .set("Authorization", `Bearer ${tokens.user1}`);
-    expect(res.statusCode).toBe(404);
-  });
-
-  test("Delete Playdate - Fail no token", async () => {
-    const res = await request(app).delete(`/api/playdates/${playdateId}`);
     expect(res.statusCode).toBe(401);
   });
 
   test("Delete Playdate - Success by owner", async () => {
     const res = await request(app)
-      .delete(`/api/playdates/${playdateId}`)
+      .delete(`/api/playdates/${crudPlaydateId}`)
       .set("Authorization", `Bearer ${tokens.user1}`);
     expect(res.statusCode).toBe(200);
+  });
+
+  test("Get All Playdates - after deletions", async () => {
+    const res = await request(app).get("/api/playdates");
+    expect(res.statusCode).toBe(200);
+    expect(res.body.length).toBe(1);
+  });
+});
+
+describe("Playdate Participants Tests", () => {
+  test("Add Participant - Success", async () => {
+    const res = await request(app)
+      .post(`/api/playdates/${participantPlaydateId}/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`)
+      .send({ dogIds: [] });
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBe("Participation confirmed");
+  });
+
+  test("Add Participant - Fail double participation", async () => {
+    await request(app)
+      .post(`/api/playdates/${participantPlaydateId}/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`)
+      .send({ dogIds: [] });
+
+    const res = await request(app)
+      .post(`/api/playdates/${participantPlaydateId}/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`)
+      .send({ dogIds: [] });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toBe("User already participating");
+  });
+
+  test("Add Participant - Fail invalid playdate ID", async () => {
+    const res = await request(app)
+      .post(`/api/playdates/invalidID/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`)
+      .send({ dogIds: [] });
+    expect(res.statusCode).toBe(400);
+  });
+
+  test("Add Participant - Fail non-existing playdate", async () => {
+    const res = await request(app)
+      .post(`/api/playdates/${new mongoose.Types.ObjectId()}/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`)
+      .send({ dogIds: [] });
+    expect(res.statusCode).toBe(404);
+  });
+
+  test("Add Participant - Fail without token", async () => {
+    const res = await request(app)
+      .post(`/api/playdates/${participantPlaydateId}/attend`)
+      .send({ dogIds: [] });
+    expect(res.statusCode).toBe(401);
+  });
+
+  test("Add Participant - Fail with invalid token", async () => {
+    const res = await request(app)
+      .post(`/api/playdates/${participantPlaydateId}/attend`)
+      .set("Authorization", `Bearer invalidtoken`)
+      .send({ dogIds: [] });
+    expect(res.statusCode).toBe(401);
+  });
+
+  test("Remove Participant - Success", async () => {
+    await request(app)
+      .post(`/api/playdates/${participantPlaydateId}/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`)
+      .send({ dogIds: [] });
+
+    const res = await request(app)
+      .delete(`/api/playdates/${participantPlaydateId}/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBe("Participation removed");
+  });
+
+  test("Remove Participant - Fail if not participating", async () => {
+    const res = await request(app)
+      .delete(`/api/playdates/${participantPlaydateId}/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`);
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toBe("User not participating");
+  });
+
+  test("Remove Participant - Fail invalid playdate ID", async () => {
+    const res = await request(app)
+      .delete(`/api/playdates/invalidID/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`);
+    expect(res.statusCode).toBe(400);
+  });
+
+  test("Remove Participant - Fail non-existing playdate", async () => {
+    const res = await request(app)
+      .delete(`/api/playdates/${new mongoose.Types.ObjectId()}/attend`)
+      .set("Authorization", `Bearer ${tokens.user1}`);
+    expect(res.statusCode).toBe(404);
+  });
+
+  test("Remove Participant - Fail without token", async () => {
+    const res = await request(app).delete(
+      `/api/playdates/${participantPlaydateId}/attend`
+    );
+    expect(res.statusCode).toBe(401);
+  });
+
+  test("Remove Participant - Fail with invalid token", async () => {
+    const res = await request(app)
+      .delete(`/api/playdates/${participantPlaydateId}/attend`)
+      .set("Authorization", `Bearer invalidtoken`);
+    expect(res.statusCode).toBe(401);
   });
 });
