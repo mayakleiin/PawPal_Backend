@@ -59,6 +59,14 @@ class PlaydateController extends BaseController<IPlaydate> {
         return;
       }
 
+      const participant = playdate.participants.find(
+        (p) => p.userId.toString() === userId
+      );
+      if (!participant) {
+        res.status(400).json({ error: "User not participating" });
+        return;
+      }
+
       playdate.participants = playdate.participants.filter(
         (p) => p.userId.toString() !== userId
       );
