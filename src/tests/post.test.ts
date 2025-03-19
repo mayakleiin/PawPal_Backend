@@ -185,3 +185,123 @@ describe("Posts Test Suite", () => {
     expect(res.statusCode).toBe(404);
   });
 });
+
+describe("Post Likes", () => {
+  let likePostId = "";
+
+  beforeAll(async () => {
+    // Create new post specifically for like tests
+    const res = await request(app)
+      .post("/api/posts")
+      .set("Authorization", `Bearer ${tokens.accessToken}`)
+      .send({
+        title: "Post For Likes",
+        content: "Testing likes feature",
+      });
+    likePostId = res.body._id;
+  });
+
+  // Reset likes array before each test to ensure clean state
+  beforeEach(async () => {
+    await postModel.findByIdAndUpdate(likePostId, { likes: [] });
+  });
+
+  test("Like post - Success", async () => {
+    const res = await request(app)
+      .post(`/api/posts/${likePostId}/like`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBe("Post liked");
+
+    const post = await postModel.findById(likePostId);
+    expect(post?.likes).toContainEqual(
+      new mongoose.Types.ObjectId(tokens.userId)
+    );
+  });
+
+  test("Like post - Fail double like", async () => {
+    await request(app)
+      .post(`/api/posts/${likePostId}/like`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+
+    const res = await request(app)
+      .post(`/api/posts/${likePostId}/like`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toBe("Post already liked");
+  });
+
+  test("Unlike post - Success", async () => {
+    await request(app)
+      .post(`/api/posts/${likePostId}/like`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+
+    const res = await request(app)
+      .delete(`/api/posts/${likePostId}/like`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBe("Post unliked");
+
+    const post = await postModel.findById(likePostId);
+    expect(post?.likes).not.toContainEqual(
+      new mongoose.Types.ObjectId(tokens.userId)
+    );
+  });
+
+  test("Unlike post - Fail if not liked yet", async () => {
+    const res = await request(app)
+      .delete(`/api/posts/${likePostId}/like`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toBe("Post not liked yet");
+  });
+
+  test("Like post - Fail without token", async () => {
+    const res = await request(app).post(`/api/posts/${likePostId}/like`);
+
+    expect(res.statusCode).toBe(401);
+  });
+
+  test("Like post - Fail with invalid token", async () => {
+    const res = await request(app)
+      .post(`/api/posts/${likePostId}/like`)
+      .set("Authorization", `Bearer invalidtoken`);
+
+    expect(res.statusCode).toBe(401);
+  });
+
+  test("Unlike post - Fail without token", async () => {
+    const res = await request(app).delete(`/api/posts/${likePostId}/like`);
+
+    expect(res.statusCode).toBe(401);
+  });
+
+  test("Unlike post - Fail with invalid token", async () => {
+    const res = await request(app)
+      .delete(`/api/posts/${likePostId}/like`)
+      .set("Authorization", `Bearer invalidtoken`);
+
+    expect(res.statusCode).toBe(401);
+  });
+
+  // Checking Like on non-existing post
+  test("Like post - Fail if post does not exist", async () => {
+    const res = await request(app)
+      .post(`/api/posts/609c5e7b8e620e0015b3b8e1/like`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+
+    expect(res.statusCode).toBe(404);
+  });
+
+  test("Unlike post - Fail if post does not exist", async () => {
+    const res = await request(app)
+      .delete(`/api/posts/609c5e7b8e620e0015b3b8e1/like`)
+      .set("Authorization", `Bearer ${tokens.accessToken}`);
+
+    expect(res.statusCode).toBe(404);
+  });
+});
