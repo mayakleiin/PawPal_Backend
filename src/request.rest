@@ -4,19 +4,19 @@
 
 ### ===== AUTH REQUESTS ===== ###
 
-### Register
+### Register a new user
 POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
   "name": "Maya Klein",
-  "email": "hey@example.com",
+  "email": "maya@example.com",
   "password": "123456"
 }
 
 ###
 
-### Login
+### User login
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -27,36 +27,49 @@ Content-Type: application/json
 
 ###
 
+### ===== AI REQUESTS ===== ###
+
+### Fetch AI-generated response (ChatGPT Free Model)
+POST http://localhost:3000/api/ai
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2RiMDhjZTM3MzdjZjJhOWYyZTNjYjciLCJyYW5kb20iOjUyNzI0NCwiaWF0IjoxNzQyNDA3ODkwLCJleHAiOjE3NDI0MTE0OTB9.FfRBoSKdur_ieO87SIHIqNMFWsYymE9itBMMc02Asjk
+
+{
+  "question": "How can I train my dog?"
+}
+
+###
+
 ### ===== POSTS REQUESTS ===== ###
 
-### Get All Posts (Default Paging - First Page, 10 per page)
+### Get all posts (Default Paging - First Page, 10 per page)
 GET {{baseUrl}}/api/posts
 
 ###
 
-### Get Paginated Posts - Page 2, 10 Posts Per Page
+### Get paginated posts - Page 2, 10 posts per page
 GET {{baseUrl}}/api/posts?page=2&limit=10
 
 ###
 
-### Get Paginated Posts - Page 3, 5 Posts Per Page
+### Get paginated posts - Page 3, 5 posts per page
 GET {{baseUrl}}/api/posts?page=3&limit=5
 
 ###
 
-### Get Post by ID
+### Get a post by ID
 GET {{baseUrl}}/api/posts/{{postId}}
 
 ###
 
 ### ===== COMMENTS REQUESTS ===== ###
 
-### Get All Comments
+### Get all comments
 GET {{baseUrl}}/api/comments
 
 ###
 
-### Get Comment by ID
+### Get a comment by ID
 GET {{baseUrl}}/api/comments/{{commentId}}
 
 ###
