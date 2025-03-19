@@ -10,6 +10,10 @@
     "start": "tsc && node ./dist/src/app.js",
     "dev": "nodemon ./src/app.ts",
     "test": "tsc && jest --detectOpenHandles --forceExit --coverage --runInBand",
+    "testAuth": "tsc && jest --detectOpenHandles --forceExit auth.test.ts",
+    "testPost": "tsc && jest --detectOpenHandles --forceExit post.test.ts",
+    "testComment": "tsc && jest --detectOpenHandles --forceExit comment.test.ts",
+    "testUser": "tsc && jest --detectOpenHandles --forceExit user.test.ts",
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
