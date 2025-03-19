@@ -1,15 +1,40 @@
-import express from "express"; 
+import express from "express";
 const router = express.Router();
-import postsController from "../controllers/post_controller";
+import { postsController } from "../controllers/post_controller";
+import basePostsController from "../controllers/post_controller";
 import { authMiddleware } from "../middleware/auth_middleware";
 
-//Protect routes that require authentication
-router.post("/", authMiddleware, postsController.create.bind(postsController)); // Create a new post (requires authentication)
-router.put("/:id", authMiddleware, postsController.update.bind(postsController)); // Update a post (requires authentication)
-router.delete("/:id", authMiddleware, postsController.delete.bind(postsController)); // Delete a post (requires authentication)
+// Protect routes
+router.post(
+  "/",
+  authMiddleware,
+  basePostsController.create.bind(basePostsController)
+);
+router.put(
+  "/:id",
+  authMiddleware,
+  basePostsController.update.bind(basePostsController)
+);
+router.delete(
+  "/:id",
+  authMiddleware,
+  basePostsController.delete.bind(basePostsController)
+);
 
-//Public routes that do not require authentication
-router.get("/", postsController.getAll.bind(postsController)); // Get all posts
-router.get("/:id", postsController.getById.bind(postsController)); // Get a specific post by ID
+// Like & Unlike routes
+router.post(
+  "/:id/like",
+  authMiddleware,
+  postsController.likePost.bind(postsController)
+);
+router.delete(
+  "/:id/like",
+  authMiddleware,
+  postsController.unlikePost.bind(postsController)
+);
+
+// Public routes
+router.get("/", basePostsController.getAll.bind(basePostsController));
+router.get("/:id", basePostsController.getById.bind(basePostsController));
 
 export default router;
