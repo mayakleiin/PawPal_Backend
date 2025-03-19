@@ -29,8 +29,18 @@ Content-Type: application/json
 
 ### ===== POSTS REQUESTS ===== ###
 
-### Get All Posts
+### Get All Posts (Default Paging - First Page, 10 per page)
 GET {{baseUrl}}/api/posts
+
+###
+
+### Get Paginated Posts - Page 2, 10 Posts Per Page
+GET {{baseUrl}}/api/posts?page=2&limit=10
+
+###
+
+### Get Paginated Posts - Page 3, 5 Posts Per Page
+GET {{baseUrl}}/api/posts?page=3&limit=5
 
 ###
 
@@ -50,4 +60,3 @@ GET {{baseUrl}}/api/comments
 GET {{baseUrl}}/api/comments/{{commentId}}
 
 ###
-

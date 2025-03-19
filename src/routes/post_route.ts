@@ -34,7 +34,7 @@ router.delete(
 );
 
 // Public routes
-router.get("/", basePostsController.getAll.bind(basePostsController));
+router.get("/", postsController.getPaginatedPosts.bind(postsController)); // Fetch paginated posts
 router.get("/:id", basePostsController.getById.bind(basePostsController));
 
 export default router;
