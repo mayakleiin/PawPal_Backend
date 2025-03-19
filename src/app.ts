@@ -1,4 +1,5 @@
 import initApp from "./server";
+import aiRoute from "./routes/ai_route"; 
 
 const port = process.env.PORT || 3000; // Ensure default port if .env is missing
 
@@ -8,6 +9,9 @@ initApp()
       console.error("PORT is not defined in environment variables.");
       process.exit(1); // Exit if no port is set
     }
+
+    // Register AI route
+    app.use("/api/ai", aiRoute); 
 
     app.listen(port, () => {
       console.log(`PawPal listening at http://localhost:${port}`);
