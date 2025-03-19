@@ -83,7 +83,11 @@ describe("Playdates CRUD Tests", () => {
   test("Get All Playdates", async () => {
     const res = await request(app).get("/api/playdates");
     expect(res.statusCode).toBe(200);
-    expect(res.body.length).toBe(2);
+    expect(res.body.items).toBeDefined();
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.items.length).toBe(2);
+    expect(res.body.totalItems).toBe(2);
+    expect(res.body.currentPage).toBe(1);
   });
 
   test("Get Playdate by ID - Success", async () => {
@@ -144,7 +148,11 @@ describe("Playdates CRUD Tests", () => {
   test("Get All Playdates - after deletions", async () => {
     const res = await request(app).get("/api/playdates");
     expect(res.statusCode).toBe(200);
-    expect(res.body.length).toBe(1);
+    expect(res.body.items).toBeDefined();
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.items.length).toBe(1);
+    expect(res.body.totalItems).toBe(1);
+    expect(res.body.currentPage).toBe(1);
   });
 });
 

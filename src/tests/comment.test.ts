@@ -77,7 +77,11 @@ describe("Comments Test Suite", () => {
   test("Get all comments - empty initially", async () => {
     const res = await request(app).get("/api/comments");
     expect(res.statusCode).toBe(200);
-    expect(res.body.length).toBe(0);
+    expect(res.body.items).toBeDefined();
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.items.length).toBe(0);
+    expect(res.body.totalItems).toBe(0);
+    expect(res.body.currentPage).toBe(1);
   });
 
   test("Create comment - Success", async () => {
