@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import path from "path";
+import { swaggerSpec, swaggerUi } from "./utils/swagger";
 import authRoutes from "./routes/auth_route";
 import userRoutes from "./routes/user_route";
 import postRoutes from "./routes/post_route";
@@ -15,6 +16,8 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Default route for API status check
 app.get("/", (_req, res) => {
