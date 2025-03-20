@@ -25,6 +25,8 @@ const router = express.Router();
  *           type: string
  *         content:
  *           type: string
+ *         image:
+ *           type: string
  *         owner:
  *           type: string
  *         likes:
@@ -41,12 +43,16 @@ const router = express.Router();
  *           type: string
  *         content:
  *           type: string
+ *         image:
+ *           type: string
  *     UpdatePostRequest:
  *       type: object
  *       properties:
  *         title:
  *           type: string
  *         content:
+ *           type: string
+ *         image:
  *           type: string
  */
 

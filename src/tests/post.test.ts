@@ -83,9 +83,11 @@ describe("Posts Test Suite", () => {
       .send({
         title: "First Post",
         content: "This is my first post",
+        image: "/public/posts/fake_post.png",
       });
     expect(res.statusCode).toBe(201);
     expect(res.body.title).toBe("First Post");
+    expect(res.body.image).toBe("/public/posts/fake_post.png");
     postId = res.body._id;
   });
 
@@ -126,8 +128,10 @@ describe("Posts Test Suite", () => {
       .send({
         title: "Updated Title",
         content: "Updated Content",
+        image: "/public/posts/fake_post_updated.png",
       });
     expect(res.statusCode).toBe(200);
+    expect(res.body.image).toBe("/public/posts/fake_post_updated.png");
     expect(res.body.title).toBe("Updated Title");
   });
 
