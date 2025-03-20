@@ -2,13 +2,13 @@ import express, { Express } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import path from "path";
 import { swaggerSpec, swaggerUi } from "./utils/swagger";
 import authRoutes from "./routes/auth_route";
 import userRoutes from "./routes/user_route";
 import postRoutes from "./routes/post_route";
 import commentRoutes from "./routes/comment_route";
-import playdateRoutes from "./routes/playdate_route";
+import PlaydateRoutes from "./routes/playdate_route";
+import fileRoutes from "./routes/file_route";
 import aiRoutes from "./routes/ai_route"; 
 
 dotenv.config();
@@ -23,9 +23,8 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/", (_req, res) => {
   res.send("PawPal API is running");
 });
-
-// Serve uploaded files
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/public", express.static("public"));
+app.use("/file", fileRoutes);
 
 // Register API routes
 app.use("/api/auth", authRoutes);

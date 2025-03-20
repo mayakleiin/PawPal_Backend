@@ -93,9 +93,11 @@ describe("Users Test Suite", () => {
       .set("Authorization", `Bearer ${tokens.accessToken}`)
       .send({
         city: "Tel Aviv",
+        profileImage: "/public/users/fake_profile.png",
       });
     expect(res.statusCode).toBe(200);
     expect(res.body.city).toBe("Tel Aviv");
+    expect(res.body.profileImage).toBe("/public/users/fake_profile.png");
   });
 
   test("Update user details - Fail with second user token", async () => {
@@ -117,8 +119,10 @@ describe("Users Test Suite", () => {
         birthYear: 2020,
         birthMonth: 5,
         breed: "Labrador",
+        image: "/public/dogs/fake_dog.png",
       });
     expect(res.statusCode).toBe(200);
+    expect(res.body.dogs[0].image).toBe("/public/dogs/fake_dog.png");
     expect(res.body.dogs.length).toBeGreaterThan(0);
     dogId = res.body.dogs[0]._id;
   });

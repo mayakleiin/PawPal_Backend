@@ -2,6 +2,8 @@ import User, { IUser } from "../models/user_model";
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
+const defaultUserImage = "/public/users/user_default.png";
+
 interface TokenPayload extends JwtPayload {
   _id: string;
   random: string;
@@ -70,18 +72,24 @@ const register = async ({
   name,
   email,
   password,
+  profileImage,
   ...rest
 }: {
   name: string;
   email: string;
   password: string;
+  profileImage?: string;
+  city?: string;
+  gender?: "Male" | "Female" | "Other";
 }) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
+
   const user = await User.create({
     name,
     email,
     password: hashedPassword,
+    profileImage: profileImage || defaultUserImage,
     ...rest,
   });
   return user;

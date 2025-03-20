@@ -21,6 +21,9 @@ const testUser = {
   name: "Test User",
   email: "test@example.com",
   password: "123456",
+  profileImage: "/public/users/fake.png",
+  city: "Tel Aviv",
+  gender: "Female",
 };
 
 const tokens = {

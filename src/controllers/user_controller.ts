@@ -3,6 +3,9 @@ import userService from "../services/user_service";
 import logger from "../utils/logger";
 import mongoose from "mongoose";
 
+const defaultUserImage = "/public/users/user_default.png";
+const defaultDogImage = "/public/dogs/dog_default.png";
+
 // Get All Users
 const getAllUsers = async (_req: Request, res: Response) => {
   try {
@@ -48,7 +51,16 @@ const updateUserDetails = async (req: Request, res: Response) => {
       return;
     }
 
-    const updatedUser = await userService.updateUserDetails(userId, req.body);
+    // Get name, city, gender and profileImage from body
+    const { name, city, gender, profileImage } = req.body;
+
+    const updatedUser = await userService.updateUserDetails(userId, {
+      name,
+      city,
+      gender,
+      profileImage: profileImage || defaultUserImage,
+    });
+
     if (!updatedUser) {
       res.status(404).json({ message: "User not found" });
       return;
@@ -87,7 +99,17 @@ const deleteUser = async (req: Request, res: Response) => {
 const addDog = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const user = await userService.addDog(userId, req.body);
+    const { name, birthYear, birthMonth, breed, image } = req.body;
+
+    const dogData = {
+      name,
+      birthYear,
+      birthMonth,
+      breed,
+      image: image || defaultDogImage,
+    };
+
+    const user = await userService.addDog(userId, dogData);
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
@@ -103,7 +125,17 @@ const addDog = async (req: Request, res: Response) => {
 const updateDog = async (req: Request, res: Response) => {
   try {
     const { userId, dogId } = req.params;
-    const user = await userService.updateDog(userId, dogId, req.body);
+    const { name, birthYear, birthMonth, breed, image } = req.body;
+
+    const dogData = {
+      name,
+      birthYear,
+      birthMonth,
+      breed,
+      image: image || defaultDogImage,
+    };
+
+    const user = await userService.updateDog(userId, dogId, dogData);
     if (!user) {
       res.status(404).json({ message: "User or dog not found" });
       return;

@@ -31,7 +31,7 @@ const dogSchema = new Schema<IDog>(
     birthYear: { type: Number, required: true },
     birthMonth: { type: Number, required: true },
     breed: { type: String },
-    image: { type: String, default: "/uploads/dogs/dog_default.JPG" },
+    image: { type: String, default: "/public/dogs/dog_default.JPG" },
   },
   { _id: true }
 );
@@ -56,7 +56,7 @@ const userSchema = new Schema<IUser>({
   gender: { type: String, enum: ["Male", "Female", "Other"] },
   profileImage: {
     type: String,
-    default: "/uploads/users/user_default.png",
+    default: "/public/users/user_default.png",
   },
   dogs: [dogSchema],
   refreshToken: {
