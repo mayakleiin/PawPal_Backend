@@ -1,22 +1,23 @@
 @baseUrl = http://localhost:3000
 @postId = 1234567890abcdef12345678
 @commentId = 1234567890abcdef12345678
+@authToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2RiMGRjMTczMGFhOGM5MDJlMTk3YzYiLCJyYW5kb20iOjkzMDQzMywiaWF0IjoxNzQyNDg2MjA5LCJleHAiOjE3NDI0ODk4MDl9.mQfyzclXFI5xIKHdPJIr_bfPT-7wXEcECOy8Y0amrRU
 
 ### ===== AUTH REQUESTS ===== ###
 
-### Register
+### Register a new user
 POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
   "name": "Maya Klein",
-  "email": "hey@example.com",
+  "email": "maya@example.com",
   "password": "123456"
 }
 
 ###
 
-### Login
+### User login
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -27,36 +28,118 @@ Content-Type: application/json
 
 ###
 
+### ===== AI REQUESTS (Gemini API) ===== ###
+
+### Fetch AI-generated response - Valid Request
+POST {{baseUrl}}/api/ai
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "question": "What are the best training tips for a puppy?"
+}
+
+###
+
+### Fetch AI-generated response - Missing question (Bad Request)
+POST {{baseUrl}}/api/ai
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+}
+
+###
+
+### Fetch AI-generated response - Unauthorized (No Token)
+POST {{baseUrl}}/api/ai
+Content-Type: application/json
+
+{
+  "question": "What is the best way to socialize a dog?"
+}
+
+###
+
+### Fetch AI-generated response - Invalid Token
+POST {{baseUrl}}/api/ai
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2RiMGRjMTczMGFhOGM5MDJlMTk3YzYiLCJyYW5kb20iOjkzMDQzMywiaWF0IjoxNzQyNDg2MjA5LCJleHAiOjE3NDI0ODk4MDl9.mQfyzclXFI5xIKHdPJIr_bfPT-7wXEcECOy8Y0amrRU
+
+{
+  "question": "What are common dog training mistakes?"
+}
+
+###
+
+### Fetch AI-generated response - Large Input (Edge Case)
+POST {{baseUrl}}/api/ai
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "question": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(50)
+}
+
+###
+
+### Fetch AI-generated response - Rapid multiple requests (Rate Limit Test)
+POST {{baseUrl}}/api/ai
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "question": "How can I keep my dog entertained indoors?"
+}
+
+POST {{baseUrl}}/api/ai
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "question": "What are the best dog breeds for families?"
+}
+
+POST {{baseUrl}}/api/ai
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "question": "How to teach a dog to walk on a leash?"
+}
+
+###
+
 ### ===== POSTS REQUESTS ===== ###
 
-### Get All Posts (Default Paging - First Page, 10 per page)
+### Get all posts (Default Paging - First Page, 10 per page)
 GET {{baseUrl}}/api/posts
 
 ###
 
-### Get Paginated Posts - Page 2, 10 Posts Per Page
+### Get paginated posts - Page 2, 10 posts per page
 GET {{baseUrl}}/api/posts?page=2&limit=10
 
 ###
 
-### Get Paginated Posts - Page 3, 5 Posts Per Page
+### Get paginated posts - Page 3, 5 posts per page
 GET {{baseUrl}}/api/posts?page=3&limit=5
 
 ###
 
-### Get Post by ID
+### Get a post by ID
 GET {{baseUrl}}/api/posts/{{postId}}
 
 ###
 
 ### ===== COMMENTS REQUESTS ===== ###
 
-### Get All Comments
+### Get all comments
 GET {{baseUrl}}/api/comments
 
 ###
 
-### Get Comment by ID
+### Get a comment by ID
 GET {{baseUrl}}/api/comments/{{commentId}}
 
 ###
