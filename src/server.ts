@@ -7,7 +7,8 @@ import authRoutes from "./routes/auth_route";
 import userRoutes from "./routes/user_route";
 import postRoutes from "./routes/post_route";
 import commentRoutes from "./routes/comment_route";
-import PlaydateRoutes from "./routes/playdate_route";
+import playdateRoutes from "./routes/playdate_route";
+import aiRoutes from "./routes/ai_route"; 
 
 dotenv.config();
 const app = express();
@@ -15,15 +16,21 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Default route for API status check
 app.get("/", (_req, res) => {
   res.send("PawPal API is running");
 });
+
+// Serve uploaded files
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
+// Register API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
-app.use("/api/playdates", PlaydateRoutes);
+app.use("/api/playdates", playdateRoutes);
+app.use("/api/ai", aiRoutes); 
 
 const initApp = (): Promise<Express> => {
   return new Promise<Express>((resolve, reject) => {
@@ -41,7 +48,6 @@ const initApp = (): Promise<Express> => {
         .then(() => {
           resolve(app);
         })
-
         .catch((err: unknown) => {
           reject(err);
         });

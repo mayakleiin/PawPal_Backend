@@ -1,54 +1,60 @@
-import { Request, Response } from "express";
 import axios from "axios";
-import { BaseController } from "./base_controller";
+import { Request, Response } from "express";
+import createController, { BaseController } from "./base_controller";
 import logger from "../utils/logger";
 
-class AIController extends BaseController<any> {
-  constructor() {
-    super(null as any);
-  }
+// AI Controller - No database model needed
+class AIController {
+  constructor() {}
 
-  //Fetch AI-generated response using OpenAI (ChatGPT Free Model)
-  async getAIResponse(req: Request, res: Response): Promise<void> {
+  // Fetch AI-generated response
+  async askAI(req: Request, res: Response): Promise<void> {
     try {
       const { question } = req.body;
 
-      // Validate input - question is required
+      // Validate request payload
       if (!question) {
         res.status(400).json({ error: "Question is required" });
         return;
       }
 
-      logger.info(`AI request received: ${question}`);
+      // Log the AI request
+      logger.info(`AI Request: ${question}`);
 
-      // Sending request to OpenAI API (using free model gpt-3.5-turbo)
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
+      // Send request to Google Gemini API
+      const geminiResponse = await axios.post(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
         {
-          model: "gpt-3.5-turbo", // Ensuring free-tier usage
-          messages: [{ role: "user", content: question }],
-          max_tokens: 150, // Limiting response size to avoid unnecessary usage
+          contents: [{ parts: [{ text: question }] }],
         },
         {
           headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // Using API Key from .env file
             "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.GEMINI_API_KEY}`,
           },
         }
       );
 
-      // Extract AI-generated answer
-      const aiAnswer = (response.data as { choices: { message: { content: string } }[] }).choices[0].message.content;
-      logger.info(`AI response received: ${aiAnswer}`);
+      // Extract response from API
+      const data = geminiResponse.data as {
+        candidates?: { content?: { parts?: { text: string }[] } }[]
+      };
+      const answer =
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "No response from AI";
 
-      // Send response back to the user
-      res.status(200).json({ answer: aiAnswer });
-    } catch (error) {
-      logger.error("Error fetching AI response:", error);
+      // Log AI response
+      logger.info(`AI Response: ${answer}`);
+
+      // Send response back to client
+      res.status(200).json({ answer });
+    } catch (error: any) {
+      logger.error("Failed to fetch AI response", error.response?.data || error.message);
       res.status(500).json({ error: "Failed to fetch AI response" });
     }
   }
 }
 
-// Creating AIController instance
+// Export AI controller instance
 export const aiController = new AIController();
+export default aiController;
