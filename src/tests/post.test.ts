@@ -69,7 +69,11 @@ describe("Posts Test Suite", () => {
   test("Get all posts - empty initially", async () => {
     const res = await request(app).get("/api/posts");
     expect(res.statusCode).toBe(200);
-    expect(res.body.length).toBe(0);
+    expect(res.body.items).toBeDefined();
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.items.length).toBe(0);
+    expect(res.body.totalItems).toBe(0);
+    expect(res.body.currentPage).toBe(1);
   });
 
   test("Create post - Success", async () => {
