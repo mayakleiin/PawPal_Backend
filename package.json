@@ -16,6 +16,7 @@
     "testUser": "tsc && jest --detectOpenHandles --forceExit user.test.ts",
     "testPlaydate": "tsc && jest --detectOpenHandles --forceExit playdate.test.ts",
     "testFile": "tsc && jest --detectOpenHandles --forceExit file.test.ts",
+    "testAI": "tsc && jest --detectOpenHandles --forceExit ai.test.ts",
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
