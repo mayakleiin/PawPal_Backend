@@ -93,7 +93,18 @@ const register = async ({
     profileImage: profileImage || defaultUserImage,
     ...rest,
   });
-  return user;
+
+  const tokens = generateTokens(user);
+
+  // Save refreshToken to DB
+  user.refreshToken = [tokens.refreshToken];
+  await user.save();
+
+  return {
+    user,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  };
 };
 
 // Google Signin

@@ -38,6 +38,8 @@ describe("Auth Tests Suite", () => {
       .send(testUser);
     expect(response.statusCode).toBe(200);
     expect(response.body.user.email).toBe(testUser.email);
+    expect(response.body.accessToken).toBeDefined();
+    expect(response.body.refreshToken).toBeDefined();
   });
 
   test("Register - Fail duplicate email", async () => {
