@@ -1,7 +1,10 @@
 import request from "supertest";
 import initApp from "../server";
 import mongoose from "mongoose";
-import { Application } from "express";
+import { Express } from "express";
+
+let app: Express;
+let validToken: string;
 
 jest.mock("axios", () => ({
   post: jest.fn().mockResolvedValue({
@@ -10,9 +13,6 @@ jest.mock("axios", () => ({
     },
   }),
 }));
-
-let app: Application;
-let validToken: string;
 
 beforeAll(async () => {
   app = await initApp();

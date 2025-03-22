@@ -16,9 +16,17 @@ const register = async (req: Request, res: Response) => {
       message: "User registered successfully",
       user: { id: user._id, email: user.email, name: user.name },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Handle duplicate email error from MongoDB
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "code" in err &&
+      err.code === 11000 &&
+      "keyPattern" in err &&
+      err.keyPattern &&
+      (err.keyPattern as { email?: string }).email
+    ) {
       res.status(400).json({ message: "Email already exists." });
       return;
     }
@@ -29,6 +37,32 @@ const register = async (req: Request, res: Response) => {
       res
         .status(400)
         .json({ message: "An unknown error occurred during registration." });
+    }
+  }
+};
+
+// Google sign in
+const googleSignin = async (req: Request, res: Response) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      res.status(400).json({ message: "Google credential is required." });
+      return;
+    }
+
+    const result = await authService.googleSignin(credential);
+
+    res.status(200).json({
+      message: "User logged in with Google successfully",
+      ...result,
+    });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      res.status(400).json({ message: err.message });
+    } else {
+      res
+        .status(400)
+        .json({ message: "An unknown error occurred during Google login." });
     }
   }
 };
@@ -46,7 +80,7 @@ const login = async (req: Request, res: Response) => {
       message: "User logged in successfully",
       ...result,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof Error) {
       res.status(400).json({ message: err.message });
     } else {
@@ -66,7 +100,7 @@ const logout = async (req: Request, res: Response) => {
     }
     await authService.logout(req.body.refreshToken);
     res.status(200).json({ message: "User logged out successfully" });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof Error) {
       res.status(400).json({ message: err.message });
     } else {
@@ -89,7 +123,7 @@ const refresh = async (req: Request, res: Response) => {
       message: "Token refreshed successfully",
       ...tokens,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof Error) {
       res.status(400).json({ message: err.message });
     } else {
@@ -100,4 +134,4 @@ const refresh = async (req: Request, res: Response) => {
   }
 };
 
-export default { register, login, logout, refresh };
+export default { register, login, logout, refresh, googleSignin };

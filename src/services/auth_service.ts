@@ -1,6 +1,7 @@
 import User, { IUser } from "../models/user_model";
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 
 const defaultUserImage = "/public/users/user_default.png";
 
@@ -95,6 +96,53 @@ const register = async ({
   return user;
 };
 
+// Google Signin
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const googleSignin = async (credential: string) => {
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    throw new Error("GOOGLE_CLIENT_ID is not defined");
+  }
+
+  const ticket = await client.verifyIdToken({
+    idToken: credential,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  const payload = ticket.getPayload();
+  if (!payload || !payload.email) {
+    throw new Error("Invalid Google Token");
+  }
+
+  let user = await User.findOne({ email: payload.email });
+  let firstTimeLogin = false;
+
+  if (!user) {
+    user = await User.create({
+      name: payload.name || "Google User",
+      email: payload.email,
+      password: "google-signin",
+      profileImage: payload.picture || defaultUserImage,
+      refreshToken: [],
+      isGoogleUser: true,
+    });
+    firstTimeLogin = true;
+  }
+
+  const tokens = await generateTokens(user);
+
+  // Clear old tokens & save only new one
+  user.refreshToken = [tokens.refreshToken];
+  await user.save();
+
+  return {
+    user,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    firstTimeLogin,
+  };
+};
+
 // Login user
 const login = async ({
   email,
@@ -151,4 +199,4 @@ const refresh = async (refreshToken: string) => {
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
 };
 
-export default { register, login, logout, refresh };
+export default { register, login, logout, refresh, googleSignin };
