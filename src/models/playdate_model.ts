@@ -13,7 +13,7 @@ export interface IPlaydate extends Document {
   description: string;
   date: Date;
   location: string;
-  owner: mongoose.Types.ObjectId; // Changed from userId to owner
+  owner: mongoose.Types.ObjectId;
   participants: IParticipant[];
 }
 
@@ -29,7 +29,7 @@ const playdateSchema = new Schema<IPlaydate>({
   description: { type: String, required: false },
   date: { type: Date, required: true },
   location: { type: String, required: true },
-  owner: { type: Schema.Types.ObjectId, ref: "Users", required: true }, // Changed to owner
+  owner: { type: Schema.Types.ObjectId, ref: "Users", required: true },
   participants: { type: [participantSchema], default: [] },
 });
 
