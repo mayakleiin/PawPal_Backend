@@ -22,6 +22,7 @@ export interface IUser {
   dogs: IDog[];
   _id?: string;
   refreshToken?: string[];
+  isGoogleUser: boolean;
 }
 
 // Dog Schema
@@ -63,6 +64,7 @@ const userSchema = new Schema<IUser>({
     type: [String],
     default: [],
   },
+  isGoogleUser: { type: Boolean, default: false },
 });
 
 const User = mongoose.model<IUser>("Users", userSchema);

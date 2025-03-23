@@ -3,9 +3,9 @@ import initApp from "../server";
 import path from "path";
 import mongoose from "mongoose";
 import fs from "fs";
-import { Application } from "express";
+import { Express } from "express";
 
-let app: Application;
+let app: Express;
 
 beforeAll(async () => {
   app = await initApp();

@@ -7,9 +7,9 @@ import authRoutes from "./routes/auth_route";
 import userRoutes from "./routes/user_route";
 import postRoutes from "./routes/post_route";
 import commentRoutes from "./routes/comment_route";
-import PlaydateRoutes from "./routes/playdate_route";
+import playdateRoutes from "./routes/playdate_route";
 import fileRoutes from "./routes/file_route";
-import aiRoutes from "./routes/ai_route"; 
+import aiRoutes from "./routes/ai_route";
 
 dotenv.config();
 const app = express();
@@ -32,7 +32,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/playdates", playdateRoutes);
-app.use("/api/ai", aiRoutes); 
+app.use("/api/ai", aiRoutes);
 
 const initApp = (): Promise<Express> => {
   return new Promise<Express>((resolve, reject) => {

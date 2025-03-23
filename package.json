@@ -16,6 +16,8 @@
     "testUser": "tsc && jest --detectOpenHandles --forceExit user.test.ts",
     "testPlaydate": "tsc && jest --detectOpenHandles --forceExit playdate.test.ts",
     "testFile": "tsc && jest --detectOpenHandles --forceExit file.test.ts",
+    "testAI": "tsc && jest --detectOpenHandles --forceExit ai.test.ts",
+    "testGoogle": "tsc && jest --detectOpenHandles --forceExit google.test.ts",
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
@@ -28,6 +30,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
+    "google-auth-library": "^9.15.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.2",

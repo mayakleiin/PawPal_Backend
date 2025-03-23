@@ -71,6 +71,28 @@ const router = express.Router();
  *           id: "60d0fe4f5311236168a109ca"
  *           name: "John Doe"
  *           email: "john@example.com"
+ *     GoogleSignInRequest:
+ *       type: object
+ *       required:
+ *         - credential
+ *       properties:
+ *         credential:
+ *           type: string
+ *       example:
+ *         credential: "eyJhbGciOiJSUzI1NiIsImtpZCI6Ij..."
+ *     GoogleSignInResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         accessToken:
+ *           type: string
+ *         refreshToken:
+ *           type: string
+ *       example:
+ *         message: "User logged in with Google successfully"
+ *         accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  */
 
 /**
@@ -170,5 +192,29 @@ router.post("/logout", authController.logout);
  *         description: Refresh token invalid or missing
  */
 router.post("/refresh", authController.refresh);
+
+/**
+ * @swagger
+ * /auth/google-signin:
+ *   post:
+ *     summary: Login or register user with Google Sign-In
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/GoogleSignInRequest'
+ *     responses:
+ *       200:
+ *         description: User logged in with Google successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GoogleSignInResponse'
+ *       400:
+ *         description: Invalid Google credential
+ */
+router.post("/google-signin", authController.googleSignin);
 
 export default router;

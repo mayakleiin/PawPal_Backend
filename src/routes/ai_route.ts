@@ -1,8 +1,18 @@
 import express from "express";
 import aiController from "../controllers/ai_controller";
 import { authMiddleware } from "../middleware/auth_middleware";
+import rateLimit from "express-rate-limit";
 
 const router = express.Router();
+
+/**
+ * Rate limiter - Limit to 5 AI requests per minute per IP
+ */
+const aiRateLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute window
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: { error: "Too many AI requests, please try again later." },
+});
 
 /**
  * @swagger
@@ -62,16 +72,27 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/AIResponse'
  *       400:
- *         description: Invalid request (missing question)
+ *         description: Invalid request (missing question or irrelevant)
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AIErrorResponse'
  *       401:
  *         description: Unauthorized (missing or invalid token)
+ *       429:
+ *         description: Too many requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AIErrorResponse'
  *       500:
  *         description: Internal Server Error
  */
-router.post("/", authMiddleware, aiController.askAI.bind(aiController));
+router.post(
+  "/",
+  authMiddleware,
+  aiRateLimiter,
+  aiController.askAI.bind(aiController)
+);
 
 export default router;
