@@ -11,10 +11,11 @@ const register = async (req: Request, res: Response) => {
         .json({ message: "Name, email, and password are required." });
       return;
     }
-    const user = await authService.register({ name, email, password });
+
+    const result = await authService.register({ name, email, password });
     res.status(200).json({
       message: "User registered successfully",
-      user: { id: user._id, email: user.email, name: user.name },
+      ...result,
     });
   } catch (err: unknown) {
     // Handle duplicate email error from MongoDB
