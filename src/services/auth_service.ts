@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 
-const defaultUserImage = "/public/users/user_default.png";
+const defaultUserImage = "/users/user_default.png";
 
 interface TokenPayload extends JwtPayload {
   _id: string;
@@ -74,15 +74,20 @@ const register = async ({
   email,
   password,
   profileImage,
-  ...rest
+  city,
 }: {
   name: string;
   email: string;
   password: string;
   profileImage?: string;
   city?: string;
-  gender?: "Male" | "Female" | "Other";
 }) => {
+  // Check if email already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new Error("Email address already exists in the system");
+  }
+
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -91,7 +96,7 @@ const register = async ({
     email,
     password: hashedPassword,
     profileImage: profileImage || defaultUserImage,
-    ...rest,
+    city,
   });
 
   const tokens = generateTokens(user);

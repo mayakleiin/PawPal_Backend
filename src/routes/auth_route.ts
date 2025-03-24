@@ -1,7 +1,39 @@
 import express from "express";
 import authController from "../controllers/auth_controller";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 const router = express.Router();
+
+// Configure multer for file upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "../public/users");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept images only
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+      return cb(new Error("Only image files are allowed!"));
+    }
+    cb(null, true);
+  },
+});
 
 /**
  * @swagger
@@ -104,9 +136,21 @@ const router = express.Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/RegisterRequest'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               city:
+ *                 type: string
+ *               profileImage:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: User registered successfully
@@ -117,7 +161,11 @@ const router = express.Router();
  *       400:
  *         description: Invalid input / Email exists
  */
-router.post("/register", authController.register);
+router.post(
+  "/register",
+  upload.single("profileImage"),
+  authController.register
+);
 
 /**
  * @swagger

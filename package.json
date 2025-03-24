@@ -18,7 +18,10 @@
     "testFile": "tsc && jest --detectOpenHandles --forceExit file.test.ts",
     "testAI": "tsc && jest --detectOpenHandles --forceExit ai.test.ts",
     "testGoogle": "tsc && jest --detectOpenHandles --forceExit google.test.ts",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "build": "tsc",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -36,7 +39,9 @@
     "mongoose": "^8.8.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -59,7 +64,8 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.18.2"
+    "typescript-eslint": "^8.18.2",
+    "mongodb-memory-server": "^9.1.6"
   },
   "keywords": []
 }

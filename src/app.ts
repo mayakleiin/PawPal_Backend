@@ -1,12 +1,11 @@
 import initApp from "./server";
 
-const port = process.env.PORT || 3000; // Ensure default port if .env is missing
-
+const port = process.env.PORT;
 initApp()
   .then((app) => {
     if (!port) {
       console.error("PORT is not defined in environment variables.");
-      process.exit(1); // Exit if no port is set
+      process.exit(1);
     }
 
     app.listen(port, () => {
@@ -15,5 +14,5 @@ initApp()
   })
   .catch((error) => {
     console.error("Server failed to start:", error);
-    process.exit(1); // Exit the process if server initialization fails
+    process.exit(1);
   });

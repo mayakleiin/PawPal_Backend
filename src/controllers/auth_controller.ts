@@ -4,7 +4,7 @@ import authService from "../services/auth_service";
 // Register user
 const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, city } = req.body;
     if (!email || !password || !name) {
       res
         .status(400)
@@ -12,12 +12,32 @@ const register = async (req: Request, res: Response) => {
       return;
     }
 
-    const result = await authService.register({ name, email, password });
+    let profileImage: string | undefined = undefined;
+    if (req.file) {
+      profileImage = `/users/${req.file.filename}`;
+    }
+
+    const result = await authService.register({
+      name,
+      email,
+      password,
+      profileImage,
+      city,
+    });
     res.status(200).json({
       message: "User registered successfully",
       ...result,
     });
   } catch (err: unknown) {
+    // Handle multer errors
+    if (
+      err instanceof Error &&
+      err.message === "Only image files are allowed!"
+    ) {
+      res.status(400).json({ message: "Only image files are allowed!" });
+      return;
+    }
+
     // Handle duplicate email error from MongoDB
     if (
       typeof err === "object" &&
@@ -28,7 +48,9 @@ const register = async (req: Request, res: Response) => {
       err.keyPattern &&
       (err.keyPattern as { email?: string }).email
     ) {
-      res.status(400).json({ message: "Email already exists." });
+      res
+        .status(400)
+        .json({ message: "Email address already exists in the system" });
       return;
     }
 
@@ -37,7 +59,7 @@ const register = async (req: Request, res: Response) => {
     } else {
       res
         .status(400)
-        .json({ message: "An unknown error occurred during registration." });
+        .json({ message: "An unknown error occurred during registration" });
     }
   }
 };

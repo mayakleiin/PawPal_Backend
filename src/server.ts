@@ -10,10 +10,18 @@ import commentRoutes from "./routes/comment_route";
 import playdateRoutes from "./routes/playdate_route";
 import fileRoutes from "./routes/file_route";
 import aiRoutes from "./routes/ai_route";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
 
+// Middleware
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
